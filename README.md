@@ -1,6 +1,6 @@
 # pg_spreadsheetml
 Export SQL query results to Excel  
-pl/pgsql function returns XML spreadsheet (XML format for storing Excel spreadsheets ) as **setof text**. 
+pl/pgsql function returns SpreadsheetML (XML format for storing Excel spreadsheets ) as **setof text**. 
 
 ```SQL
 FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json) RETURNS SETOF text
