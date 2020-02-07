@@ -3,7 +3,7 @@ Export SQL query results to Excel
 pl/pgsql function returns [SpreadsheetML](https://en.wikipedia.org/wiki/Microsoft_Office_XML_formats) (XML format for storing Excel spreadsheets ) as **setof text**. 
 
 ```PGSQL
-FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
+FUNCTION pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
  RETURNS SETOF text
  LANGUAGE plpgsql SECURITY DEFINER
 ```
