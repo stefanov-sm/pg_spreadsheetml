@@ -20,7 +20,6 @@ SQL;
 // Obtain a PDO connection object in your preferred way
 $conn = new PDO('pgsql:dbname=dvdrental;host=<host>;port=<port>;user=<user>;password=<password>');
 
-
 // Allocate arguments
 $arguments_object = (object)[];
 $arguments_object -> Number_Of_Days = '7 days';
