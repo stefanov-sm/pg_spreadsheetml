@@ -2,7 +2,7 @@
 -- pg_spreadsheetml, S. Stefanov, Feb-2020
 --------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
+CREATE OR REPLACE FUNCTION pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
 RETURNS SETOF text LANGUAGE plpgsql SECURITY DEFINER AS
 $function$
 declare
