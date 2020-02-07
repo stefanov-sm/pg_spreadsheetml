@@ -27,6 +27,6 @@ $rs -> execute([$report_query, json_encode((object)$arguments)]);
 $xml_file = fopen('delays.xml', 'wb');
 while (($xml_line = $rs -> fetchColumn()) !== FALSE)
 {
-	fputs($xml_file, $xml_line);
-};
+  fputs($xml_file, $xml_line);
+}
 fclose($xml_file);
