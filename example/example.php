@@ -3,7 +3,9 @@
 // This CLI example runs against the popular DVD RENTAL sample database.
 // It produces file 'delays.xml' in valid SpreadsheetML format. Open it with Excel.
 
+define('OUTPUT_FILE_NAME', 'delays.xml');
 define('XML_QUERY', 'SELECT xml_line from pg_spreadsheetml(?, ?) t(xml_line);');
+
 $report_query = <<<SQL
 SELECT r.rental_date, r.return_date, c.first_name, c.last_name, c.email, f.title, f.replacement_cost 
   FROM rental r
@@ -27,7 +29,7 @@ $arguments_json = json_encode($arguments_object);
 
 $rs = $conn -> prepare(XML_QUERY);
 $rs -> execute([$report_query, $arguments_json]);
-$xml_file = fopen('delays.xml', 'wb');
+$xml_file = fopen(OUTPUT_FILE_NAME, 'wb');
 while (($xml_line = $rs -> fetchColumn()) !== FALSE)
 {
   fputs($xml_file, $xml_line);
