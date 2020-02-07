@@ -91,7 +91,7 @@ begin
         running_column := 1;
 
         for v_key, v_value in select "key", value from json_each_text(jr) jt loop
-        	v_value := coalesce(xml_escape(v_value), '');
+            v_value := coalesce(xml_escape(v_value), '');
             if column_types[running_column] = 'null' then
                 column_types[running_column] := json_typeofx(jr -> v_key);
             end if;
