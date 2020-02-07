@@ -2,14 +2,14 @@
 -- pg_spreadsheetml helpers, S. Stefanov, Feb-2020
 --------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.xml_escape(s text)
+CREATE OR REPLACE FUNCTION xml_escape(s text)
 RETURNS text LANGUAGE sql IMMUTABLE STRICT AS
 $function$
   select replace(replace(replace(s, '&', '&amp;'), '>', '&gt;'), '<', '&lt;');
 $function$;
 --------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.macro_expand(macro text, args json)
+CREATE OR REPLACE FUNCTION macro_expand(macro text, args json)
 RETURNS text LANGUAGE plpgsql IMMUTABLE STRICT AS
 $function$
 declare
@@ -24,7 +24,7 @@ end;
 $function$;
 --------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.json_typeofx(j json)
+CREATE OR REPLACE FUNCTION json_typeofx(j json)
 RETURNS text LANGUAGE sql IMMUTABLE AS
 $function$
 select
