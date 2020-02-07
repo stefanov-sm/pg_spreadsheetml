@@ -3,7 +3,7 @@
 // This CLI example runs against the popular DVD RENTAL sample database.
 // It produces file 'delays.xml' in valid SpreadsheetML format. Open it with Excel.
 
-define('ML_QUERY', 'SELECT xml_line from pg_spreadsheetml(?, ?) t(xml_line);');
+define('XML_QUERY', 'SELECT xml_line from pg_spreadsheetml(?, ?) t(xml_line);');
 $report_query = <<<SQL
 SELECT r.rental_date, r.return_date, c.first_name, c.last_name, c.email, f.title, f.replacement_cost 
   FROM rental r
@@ -18,12 +18,15 @@ SQL;
 // Obtain a PDO connection object in your preferred way
 $conn = new PDO('pgsql:dbname=dvdrental;host=<host>;port=<port>;user=<user>;password=<password>');
 
-$arguments = [];
-$arguments['Number_Of_Days'] = '7 days';
-$arguments['cost'] = 15.00;
 
-$rs = $conn -> prepare(ML_QUERY);
-$rs -> execute([$report_query, json_encode((object)$arguments)]);
+// Allocate arguments
+$arguments_object = (object)[];
+$arguments_object -> Number_Of_Days = '7 days';
+$arguments_object -> cost = 15.00;
+$arguments_json = json_encode($arguments_object);
+
+$rs = $conn -> prepare(XML_QUERY);
+$rs -> execute([$report_query, $arguments_json]);
 $xml_file = fopen('delays.xml', 'wb');
 while (($xml_line = $rs -> fetchColumn()) !== FALSE)
 {
