@@ -8,7 +8,7 @@ FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}
  LANGUAGE plpgsql SECURITY DEFINER
 ```
 __arg_query__ is parameterised by plain text susbtitution (macro expansion).  
-Macro parameters are defined as valid uppercase identifiers with two underscores as prefix and suffix, i.e. `__CAR_COLOR__`, `__SALARY__`, etc. See the [example](https://github.com/stefanov-sm).
+Macro parameters are defined as valid uppercase identifiers with two underscores as prefix and suffix, i.e. `__CAR_COLOR__`, `__SALARY__`, etc. See the [example](https://github.com/stefanov-sm/pg_spreadsheetml/tree/master/example).
 
 Optional __arg_parameters__ is JSON with parameters' names/values, i.e. `{"car_color":"graphite", "salary":1000}`. Parameters' names are case-insensitive.
 
