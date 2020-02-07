@@ -15,10 +15,8 @@ SELECT r.rental_date, r.return_date, c.first_name, c.last_name, c.email, f.title
   ORDER by r.return_date - r.rental_date DESC;
 SQL;
 
-$conn = new PDO('pgsql:dbname=playground;host=172.30.0.10;port=5432;user=phpUser;password=Baba123Meca');
-
 // Obtain a PDO connection object in your preferred way
-// $conn = new PDO('pgsql:dbname=dvdrental;host=<host>;port=<port>;user=<user>;password=<password>');
+$conn = new PDO('pgsql:dbname=dvdrental;host=<host>;port=<port>;user=<user>;password=<password>');
 
 $arguments = [];
 $arguments['Number_Of_Days'] = '7 days';
