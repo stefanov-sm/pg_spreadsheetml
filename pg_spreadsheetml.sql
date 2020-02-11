@@ -2,8 +2,8 @@
 -- pg_spreadsheetml, S. Stefanov, Feb-2020
 --------------------------------------------------
 
-CREATE OR REPLACE FUNCTION pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
-RETURNS SETOF text LANGUAGE plpgsql SECURITY DEFINER AS
+CREATE OR REPLACE FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
+RETURNS SETOF text LANGUAGE plpgsql SECURITY DEFINER AS 
 $function$
 declare
 WORKBOOK_HEADER constant text :=
@@ -51,14 +51,15 @@ DTIME_ITEM    constant text := '    <Cell ss:StyleID="DateTime"><Data ss:Type="D
 TEXT_ITEM     constant text := '    <Cell><Data ss:Type="String">__VALUE__</Data></Cell>';
 NUMBER_ITEM   constant text := '    <Cell><Data ss:Type="Number">__VALUE__</Data></Cell>';
 BOOL_ITEM     constant text := '    <Cell><Data ss:Type="Boolean">__VALUE__</Data></Cell>';
+EMPTY_ITEM    constant text := '    <Cell></Cell>';
 
 COLUMN_ITEM   constant text := '   <Column ss:AutoFitWidth="0" ss:Width="__VALUE__"/>';
 BEGIN_ROW     constant text := '   <Row>';
 END_ROW       constant text := '   </Row>';
 SR_TOKEN      constant text := '__VALUE__';
 
-AVG_CHARWIDTH constant integer := 6;
-MIN_FLDWIDTH  constant integer := 30;
+AVG_CHARWIDTH constant integer := 5.5;
+MIN_FLDWIDTH  constant integer := 40;
 
 r record;
 jr json;
@@ -70,47 +71,50 @@ running_column integer;
 cold boolean := true;
 
 begin
-    return next WORKBOOK_HEADER;
-    for r in execute macro_expand(arg_query, arg_parameters) loop
+  return next WORKBOOK_HEADER;
+  for r in execute macro_expand(arg_query, arg_parameters) loop
 
-        jr := to_json(r);
-        if cold then
-            column_types := (select array_agg(json_typeofx("value")) from json_each(jr) jt);
-            for v_key in select "key" from json_each_text(jr) jt loop
-                running_line := replace(COLUMN_ITEM, SR_TOKEN, greatest(length(v_key) * AVG_CHARWIDTH, MIN_FLDWIDTH)::text);
-                return next running_line;
-            end loop;
-            return next BEGIN_ROW;
-            for v_key in select "key" from json_each_text(jr) jt loop
-                running_line := replace(TITLE_ITEM, SR_TOKEN, xml_escape(v_key));
-                return next running_line;
-            end loop;
-            return next END_ROW;
-            cold := false;
+    jr := to_json(r);
+    if cold then
+      column_types := (select array_agg(json_typeofx("value")) from json_each(jr) jt);
+      for v_key in select "key" from json_each_text(jr) jt loop
+        running_line := replace(COLUMN_ITEM, SR_TOKEN, greatest(length(v_key) * AVG_CHARWIDTH, MIN_FLDWIDTH)::text);
+        return next running_line;
+      end loop;
+      return next BEGIN_ROW;
+      for v_key in select "key" from json_each_text(jr) jt loop
+        running_line := replace(TITLE_ITEM, SR_TOKEN, xml_escape(v_key));
+        return next running_line;
+      end loop;
+      return next END_ROW;
+      cold := false;
+    end if;
+
+    return next BEGIN_ROW;
+    running_column := 1;
+
+    for v_key, v_value in select "key", "value" from json_each_text(jr) jt loop
+      if v_value is null then
+        running_line := EMPTY_ITEM;
+      else
+        if column_types[running_column] = 'null' then
+          column_types[running_column] := json_typeofx(jr -> v_key);
         end if;
-
-        return next BEGIN_ROW;
-        running_column := 1;
-
-        for v_key, v_value in select "key", "value" from json_each_text(jr) jt loop
-        	v_value := coalesce(xml_escape(v_value), '');
-            if column_types[running_column] = 'null' then
-                column_types[running_column] := json_typeofx(jr -> v_key);
-            end if;
-            case column_types[running_column]
-                when 'string', 'null' then running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
-                when 'number'         then running_line := replace(NUMBER_ITEM, SR_TOKEN, v_value);
-                when 'boolean'        then running_line := replace(BOOL_ITEM,   SR_TOKEN, coalesce(nullif(v_value, ''), 'false')::boolean::integer::text);
-                when 'date'           then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
-                when 'datetime'       then running_line := replace(DTIME_ITEM,  SR_TOKEN, v_value);
-                else                       running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
-            end case;
-            return next running_line;
-            running_column := running_column + 1;
-
-        end loop;
-        return next END_ROW;
+        v_value := xml_escape(v_value);
+        case column_types[running_column]
+          when 'string'   then running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
+          when 'number'   then running_line := replace(NUMBER_ITEM, SR_TOKEN, v_value);
+          when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::integer::text);
+          when 'date'     then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
+          when 'datetime' then running_line := replace(DTIME_ITEM,  SR_TOKEN, v_value);
+          else                 running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
+        end case;
+      end if;
+      running_column := running_column + 1;
+      return next running_line;
     end loop;
-    return next WORKBOOK_FOOTER;
+    return next END_ROW;
+  end loop;
+  return next WORKBOOK_FOOTER;
 end;
 $function$;
