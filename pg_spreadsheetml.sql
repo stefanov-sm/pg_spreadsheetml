@@ -50,6 +50,8 @@ DATE_ITEM     constant text := '    <Cell ss:StyleID="Date"><Data ss:Type="DateT
 DTIME_ITEM    constant text := '    <Cell ss:StyleID="DateTime"><Data ss:Type="DateTime">__VALUE__</Data></Cell>';
 TEXT_ITEM     constant text := '    <Cell><Data ss:Type="String">__VALUE__</Data></Cell>';
 NUMBER_ITEM   constant text := '    <Cell><Data ss:Type="Number">__VALUE__</Data></Cell>';
+BOOL_ITEM     constant text := '    <Cell><Data ss:Type="Boolean">__VALUE__</Data></Cell>';
+
 COLUMN_ITEM   constant text := '   <Column ss:AutoFitWidth="0" ss:Width="__VALUE__"/>';
 BEGIN_ROW     constant text := '   <Row>';
 END_ROW       constant text := '   </Row>';
@@ -73,7 +75,7 @@ begin
 
         jr := to_json(r);
         if cold then
-            column_types := (select array_agg(json_typeofx(value)) from json_each(jr) jt);
+            column_types := (select array_agg(json_typeofx("value")) from json_each(jr) jt);
             for v_key in select "key" from json_each_text(jr) jt loop
                 running_line := replace(COLUMN_ITEM, SR_TOKEN, greatest(length(v_key) * AVG_CHARWIDTH, MIN_FLDWIDTH)::text);
                 return next running_line;
@@ -90,15 +92,15 @@ begin
         return next BEGIN_ROW;
         running_column := 1;
 
-        for v_key, v_value in select "key", value from json_each_text(jr) jt loop
-            v_value := coalesce(xml_escape(v_value), '');
+        for v_key, v_value in select "key", "value" from json_each_text(jr) jt loop
+        	v_value := coalesce(xml_escape(v_value), '');
             if column_types[running_column] = 'null' then
                 column_types[running_column] := json_typeofx(jr -> v_key);
             end if;
             case column_types[running_column]
                 when 'string', 'null' then running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
                 when 'number'         then running_line := replace(NUMBER_ITEM, SR_TOKEN, v_value);
-                when 'boolean'        then running_line := replace(NUMBER_ITEM, SR_TOKEN, case when v_value = 'true' then 1 else 0 end);
+                when 'boolean'        then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::integer::text);
                 when 'date'           then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
                 when 'datetime'       then running_line := replace(DTIME_ITEM,  SR_TOKEN, v_value);
                 else                       running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
@@ -112,4 +114,3 @@ begin
     return next WORKBOOK_FOOTER;
 end;
 $function$;
-
