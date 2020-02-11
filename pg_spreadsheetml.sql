@@ -100,7 +100,7 @@ begin
             case column_types[running_column]
                 when 'string', 'null' then running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
                 when 'number'         then running_line := replace(NUMBER_ITEM, SR_TOKEN, v_value);
-                when 'boolean'        then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::integer::text);
+                when 'boolean'        then running_line := replace(BOOL_ITEM,   SR_TOKEN, coalesce(nullif(v_value, ''), 'false')::boolean::integer::text);
                 when 'date'           then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
                 when 'datetime'       then running_line := replace(DTIME_ITEM,  SR_TOKEN, v_value);
                 else                       running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
