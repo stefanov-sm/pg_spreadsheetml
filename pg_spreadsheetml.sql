@@ -117,4 +117,5 @@ begin
   end loop;
   return next WORKBOOK_FOOTER;
 end;
-$function$;
+$function$
+;
