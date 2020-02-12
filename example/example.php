@@ -6,6 +6,7 @@
 define('OUTPUT_FILE_NAME', 'delays.xml');
 define('XML_QUERY', 'SELECT xml_line from pg_spreadsheetml(?, ?) t(xml_line);');
 
+// This query may come from anywhere and be of any size and complexity
 $report_query = <<<SQL
 SELECT r.rental_date, r.return_date, c.first_name, c.last_name, c.email, f.title, f.replacement_cost 
   FROM rental r
@@ -26,6 +27,7 @@ $arguments_object -> Number_Of_Days = '7 days';
 $arguments_object -> cost = 15.00;
 $arguments_json = json_encode($arguments_object);
 
+// While the report query and arguments are specific this part that follows is quite generic
 $rs = $conn -> prepare(XML_QUERY);
 $rs -> execute([$report_query, $arguments_json]);
 $xml_file = fopen(OUTPUT_FILE_NAME, 'wb');
