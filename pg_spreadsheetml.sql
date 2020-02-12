@@ -5,14 +5,11 @@
 CREATE OR REPLACE FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
 RETURNS SETOF text LANGUAGE plpgsql SECURITY DEFINER AS 
 $function$
-declare
+DECLARE
 WORKBOOK_HEADER constant text :=
 $WORKBOOK_HEADER$<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office" />
- <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office" />
- <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel" />
  <Styles>
   <Style ss:ID="Default" ss:Name="Normal">
    <Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/>
@@ -70,7 +67,7 @@ running_line text;
 running_column integer;
 cold boolean := true;
 
-begin
+BEGIN
   return next WORKBOOK_HEADER;
   for r in execute macro_expand(arg_query, arg_parameters) loop
 
@@ -115,5 +112,5 @@ begin
     return next END_ROW;
   end loop;
   return next WORKBOOK_FOOTER;
-end;
+END;
 $function$;
