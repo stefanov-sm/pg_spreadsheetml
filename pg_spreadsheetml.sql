@@ -100,14 +100,13 @@ begin
         if column_types[running_column] = 'null' then
           column_types[running_column] := json_typeofx(jr -> v_key);
         end if;
-        v_value := xml_escape(v_value);
         case column_types[running_column]
-          when 'string'   then running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
+          when 'string'   then running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
           when 'number'   then running_line := replace(NUMBER_ITEM, SR_TOKEN, v_value);
-          when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::integer::text);
+          when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::bool::int::text);
           when 'date'     then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
           when 'datetime' then running_line := replace(DTIME_ITEM,  SR_TOKEN, v_value);
-          else                 running_line := replace(TEXT_ITEM,   SR_TOKEN, v_value);
+          else                 running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
         end case;
       end if;
       running_column := running_column + 1;
