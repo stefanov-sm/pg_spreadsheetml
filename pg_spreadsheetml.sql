@@ -2,29 +2,34 @@
 -- pg_spreadsheetml, S. Stefanov, Feb-2020
 --------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
-RETURNS SETOF text LANGUAGE plpgsql SECURITY DEFINER AS 
+create or replace function pg_spreadsheetml(arg_query text, arg_parameters json default '{}'::json)
+returns setof text language plpgsql security definer as
 $function$
 DECLARE
 WORKBOOK_HEADER constant text :=
 $WORKBOOK_HEADER$<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <Styles>
-  <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/></Style>
-  <Style ss:ID="Date"><NumberFormat ss:Format="Short Date"/></Style>
-  <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm\.ss"/></Style>
-  <Style ss:ID="Header">
-   <Borders>
-    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
-    <Border ss:Position="Top"    ss:LineStyle="Continuous" ss:Weight="1"/>
-    <Border ss:Position="Left"   ss:LineStyle="Continuous" ss:Weight="1"/>
-    <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1"/>
-   </Borders>
-   <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>
-  </Style>
- </Styles>
- <Worksheet ss:Name="Sheet">
+  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+   <Subject>Postgres spreadsheet export</Subject>
+   <Author>pg_spreadsheetml</Author>
+   <Company>github.com/stefanov-sm</Company>
+  </DocumentProperties>
+  <Styles>
+   <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/></Style>
+   <Style ss:ID="Date"><NumberFormat ss:Format="Short Date"/></Style>
+   <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm\.ss"/></Style>
+   <Style ss:ID="Header">
+    <Borders>
+     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+     <Border ss:Position="Top"    ss:LineStyle="Continuous" ss:Weight="1"/>
+     <Border ss:Position="Left"   ss:LineStyle="Continuous" ss:Weight="1"/>
+     <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1"/>
+    </Borders>
+    <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>
+   </Style>
+  </Styles>
+  <Worksheet ss:Name="Sheet">
   <Table>$WORKBOOK_HEADER$;
 
 WORKBOOK_FOOTER constant text :=
@@ -33,7 +38,7 @@ $WORKBOOK_FOOTER$  </Table>
    <FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane>
   </WorksheetOptions>
-</Worksheet>
+  </Worksheet>
 </Workbook>$WORKBOOK_FOOTER$;
 
 TITLE_ITEM    constant text := '    <Cell ss:StyleID="Header"><Data ss:Type="String">__VALUE__</Data></Cell>';
@@ -94,7 +99,7 @@ BEGIN
         case column_types[running_column]
           when 'string'   then running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
           when 'number'   then running_line := replace(NUMBER_ITEM, SR_TOKEN, v_value);
-          when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::bool::int::text);
+          when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::int::text);
           when 'date'     then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
           when 'datetime' then running_line := replace(DTIME_ITEM,  SR_TOKEN, v_value);
           else                 running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
