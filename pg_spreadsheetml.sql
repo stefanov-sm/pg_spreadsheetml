@@ -11,15 +11,9 @@ $WORKBOOK_HEADER$<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
  <Styles>
-  <Style ss:ID="Default" ss:Name="Normal">
-   <Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/>
-  </Style>
-  <Style ss:ID="Date">
-   <NumberFormat ss:Format="Short Date"/>
-  </Style>
-  <Style ss:ID="DateTime">
-   <NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm\.ss"/>
-  </Style>
+  <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/></Style>
+  <Style ss:ID="Date"><NumberFormat ss:Format="Short Date"/></Style>
+  <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm\.ss"/></Style>
   <Style ss:ID="Header">
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
