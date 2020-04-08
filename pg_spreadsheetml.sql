@@ -7,7 +7,7 @@ returns setof text language plpgsql security definer as
 $function$
 DECLARE
 WORKBOOK_HEADER constant text :=
-$WORKBOOK_HEADER$<?xml version="1.0"?>
+$WORKBOOK_HEADER$<?xml version="1.0" encoding="utf8"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
   <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
