@@ -1,3 +1,4 @@
+-- Postgres server-side query to spreadsheet 
 COPY
 (
  SELECT xml_line FROM pg_spreadsheetml
