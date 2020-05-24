@@ -1,45 +1,47 @@
 --------------------------------------------------
--- pg_spreadsheetml, S. Stefanov, Feb-2020
+-- pg_spreadsheetml, S. Stefanov, Feb-May 2020
 --------------------------------------------------
 
 create or replace function pg_spreadsheetml(arg_query text, arg_parameters json default '{}'::json)
 returns setof text language plpgsql security definer as
 $function$
 DECLARE
-WORKBOOK_HEADER constant text :=
-$WORKBOOK_HEADER$<?xml version="1.0" encoding="utf8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
-  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
-   <Subject>Postgres spreadsheet export</Subject>
-   <Author>pg_spreadsheetml</Author>
-   <Company>github.com/stefanov-sm</Company>
-  </DocumentProperties>
-  <Styles>
-   <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/></Style>
-   <Style ss:ID="Date"><NumberFormat ss:Format="Short Date"/></Style>
-   <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm\.ss"/></Style>
-   <Style ss:ID="Header">
-    <Borders>
-     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
-     <Border ss:Position="Top"    ss:LineStyle="Continuous" ss:Weight="1"/>
-     <Border ss:Position="Left"   ss:LineStyle="Continuous" ss:Weight="1"/>
-     <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1"/>
-    </Borders>
-    <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>
-   </Style>
-  </Styles>
-  <Worksheet ss:Name="Sheet">
-  <Table>$WORKBOOK_HEADER$;
+WORKBOOK_HEADER constant text[] := array[
+'<?xml version="1.0" encoding="utf8"?>',
+'<?mso-application progid="Excel.Sheet"?>',
+'<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">',
+'  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">',
+'   <Subject>Postgres spreadsheet export</Subject>',
+'   <Author>pg_spreadsheetml</Author>',
+'   <Company>github.com/stefanov-sm</Company>',
+'  </DocumentProperties>',
+'  <Styles>',
+'   <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/></Style>',
+'   <Style ss:ID="Date"><NumberFormat ss:Format="Short Date"/></Style>',
+'   <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm\.ss"/></Style>',
+'   <Style ss:ID="Header">',
+'    <Borders>',
+'     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>',
+'     <Border ss:Position="Top"    ss:LineStyle="Continuous" ss:Weight="1"/>',
+'     <Border ss:Position="Left"   ss:LineStyle="Continuous" ss:Weight="1"/>',
+'     <Border ss:Position="Right"  ss:LineStyle="Continuous" ss:Weight="1"/>',
+'    </Borders>',
+'    <Interior ss:Color="#FFFF00" ss:Pattern="Solid"/>',
+'   </Style>',
+'  </Styles>',
+'  <Worksheet ss:Name="Sheet">',
+'  <Table>'
+];
 
-WORKBOOK_FOOTER constant text :=
-$WORKBOOK_FOOTER$  </Table>
-  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
-   <FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane>
-  </WorksheetOptions>
-  </Worksheet>
-</Workbook>$WORKBOOK_FOOTER$;
+WORKBOOK_FOOTER constant text[] := array[
+'</Table>',
+'  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">',
+'   <FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal>',
+'   <TopRowBottomPane>1</TopRowBottomPane><ActivePane>2</ActivePane>',
+'  </WorksheetOptions>',
+'  </Worksheet>',
+'</Workbook>'
+];
 
 TITLE_ITEM    constant text := '    <Cell ss:StyleID="Header"><Data ss:Type="String">__VALUE__</Data></Cell>';
 DATE_ITEM     constant text := '    <Cell ss:StyleID="Date"><Data ss:Type="DateTime">__VALUE__</Data></Cell>';
@@ -67,7 +69,10 @@ running_column integer;
 cold boolean := true;
 
 BEGIN
-  return next WORKBOOK_HEADER;
+  foreach v_value in array WORKBOOK_HEADER loop
+  	return next v_value;
+  end loop;
+
   for r in execute macro_expand(arg_query, arg_parameters) loop
 
     jr := to_json(r);
@@ -110,6 +115,8 @@ BEGIN
     end loop;
     return next END_ROW;
   end loop;
-  return next WORKBOOK_FOOTER;
+  foreach v_value in array WORKBOOK_HEADER loop
+  	return next v_value;
+  end loop;
 END;
 $function$;
