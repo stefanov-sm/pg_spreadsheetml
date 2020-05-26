@@ -115,7 +115,7 @@ BEGIN
     end loop;
     return next END_ROW;
   end loop;
-  foreach v_value in array WORKBOOK_HEADER loop
+  foreach v_value in array WORKBOOK_FOOTER loop
   	return next v_value;
   end loop;
 END;
