@@ -56,7 +56,7 @@ BEGIN_ROW     constant text := '   <Row>';
 END_ROW       constant text := '   </Row>';
 SR_TOKEN      constant text := '__VALUE__';
 
-AVG_CHARWIDTH constant integer := 5.5;
+AVG_CHARWIDTH constant integer := 6;
 MIN_FLDWIDTH  constant integer := 40;
 
 r record;
