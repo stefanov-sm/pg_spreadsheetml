@@ -4,7 +4,7 @@
 // It produces file 'delays.xml' in valid SpreadsheetML format. Open it with Excel.
 
 define('OUTPUT_FILE_NAME', 'delays.xml');
-define('XML_QUERY', 'SELECT xml_line from pg_spreadsheetml(?, ?) t(xml_line);');
+define('XML_QUERY', 'SELECT xml_line from pg_spreadsheetml(?, ?) AS t(xml_line);');
 
 // This query may come from anywhere and be of any size and complexity
 $report_query = <<<SQL
