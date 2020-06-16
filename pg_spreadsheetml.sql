@@ -2,8 +2,8 @@
 -- pg_spreadsheetml, S. Stefanov, Feb-May 2020
 --------------------------------------------------
 
-create or replace function pg_spreadsheetml(arg_query text, arg_parameters json default '{}'::json)
-returns setof text language plpgsql security definer as
+CREATE OR REPLACE FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
+RETURNS SETOF text LANGUAGE plpgsql SECURITY DEFINER AS
 $function$
 DECLARE
 WORKBOOK_HEADER constant text[] := array[
@@ -18,7 +18,7 @@ WORKBOOK_HEADER constant text[] := array[
 '  <Styles>',
 '   <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/></Style>',
 '   <Style ss:ID="Date"><NumberFormat ss:Format="Short Date"/></Style>',
-'   <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm\.ss"/></Style>',
+'   <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm:ss"/></Style>',
 '   <Style ss:ID="Header">',
 '    <Borders>',
 '     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>',
@@ -56,8 +56,9 @@ BEGIN_ROW     constant text := '   <Row>';
 END_ROW       constant text := '   </Row>';
 SR_TOKEN      constant text := '__VALUE__';
 
-AVG_CHARWIDTH constant integer := 6;
+AVG_CHARWIDTH constant integer := 5.5;
 MIN_FLDWIDTH  constant integer := 40;
+TS_CHOP_SIZE  constant integer := 19;
 
 r record;
 jr json;
@@ -106,7 +107,7 @@ BEGIN
           when 'number'   then running_line := replace(NUMBER_ITEM, SR_TOKEN, v_value);
           when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::int::text);
           when 'date'     then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
-          when 'datetime' then running_line := replace(DTIME_ITEM,  SR_TOKEN, v_value);
+          when 'datetime' then running_line := replace(DTIME_ITEM,  SR_TOKEN, left(v_value, TS_CHOP_SIZE));
           else                 running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
         end case;
       end if;
