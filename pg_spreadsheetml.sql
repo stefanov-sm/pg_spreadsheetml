@@ -1,10 +1,11 @@
 --------------------------------------------------
--- pg_spreadsheetml, S. Stefanov, Feb-May 2020
+-- pg_spreadsheetml, S. Stefanov, Feb-June 2020
 --------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.pg_spreadsheetml(arg_query text, arg_parameters json DEFAULT '{}'::json)
 RETURNS SETOF text LANGUAGE plpgsql SECURITY DEFINER AS
 $function$
+
 DECLARE
 WORKBOOK_HEADER constant text[] := array[
 '<?xml version="1.0" encoding="utf8"?>',
@@ -17,6 +18,7 @@ WORKBOOK_HEADER constant text[] := array[
 '  </DocumentProperties>',
 '  <Styles>',
 '   <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#000000"/></Style>',
+'   <Style ss:ID="Href" ss:Name="Hyperlink"><Font ss:FontName="Arial" ss:Size="10" ss:Color="#0000FF" ss:Underline="Single"/></Style>',
 '   <Style ss:ID="Date"><NumberFormat ss:Format="Short Date"/></Style>',
 '   <Style ss:ID="DateTime"><NumberFormat ss:Format="yyyy\-mm\-dd\ hh:mm:ss"/></Style>',
 '   <Style ss:ID="Header">',
@@ -46,6 +48,7 @@ WORKBOOK_FOOTER constant text[] := array[
 TITLE_ITEM    constant text := '    <Cell ss:StyleID="Header"><Data ss:Type="String">__VALUE__</Data></Cell>';
 DATE_ITEM     constant text := '    <Cell ss:StyleID="Date"><Data ss:Type="DateTime">__VALUE__</Data></Cell>';
 DTIME_ITEM    constant text := '    <Cell ss:StyleID="DateTime"><Data ss:Type="DateTime">__VALUE__</Data></Cell>';
+HREF_ITEM     constant text := '    <Cell ss:StyleID="Href" ss:HRef="__HREF__"><Data ss:Type="String">__VALUE__</Data></Cell>';
 TEXT_ITEM     constant text := '    <Cell><Data ss:Type="String">__VALUE__</Data></Cell>';
 NUMBER_ITEM   constant text := '    <Cell><Data ss:Type="Number">__VALUE__</Data></Cell>';
 BOOL_ITEM     constant text := '    <Cell><Data ss:Type="Boolean">__VALUE__</Data></Cell>';
@@ -55,6 +58,8 @@ COLUMN_ITEM   constant text := '   <Column ss:AutoFitWidth="0" ss:Width="__VALUE
 BEGIN_ROW     constant text := '   <Row>';
 END_ROW       constant text := '   </Row>';
 SR_TOKEN      constant text := '__VALUE__';
+HREF_TOKEN    constant text := '__HREF__';
+HREF_REGEX    constant text := '^#(.+)##(.+)';
 
 AVG_CHARWIDTH constant integer := 5.5;
 MIN_FLDWIDTH  constant integer := 40;
@@ -64,6 +69,7 @@ r record;
 jr json;
 v_key text;
 v_value text;
+hrefarray text[];
 column_types text[];
 running_line text;
 running_column integer;
@@ -108,7 +114,9 @@ BEGIN
           when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::int::text);
           when 'date'     then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
           when 'datetime' then running_line := replace(DTIME_ITEM,  SR_TOKEN, left(v_value, TS_CHOP_SIZE));
-          else                 running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
+          when 'href'     then hrefarray := regexp_matches(xml_escape(v_value), HREF_REGEX);
+                          running_line := replace(replace(HREF_ITEM, SR_TOKEN, hrefarray[1]), HREF_TOKEN, hrefarray[2]);	
+          else            running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
         end case;
       end if;
       running_column := running_column + 1;
