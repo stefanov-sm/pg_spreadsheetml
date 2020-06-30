@@ -1,5 +1,4 @@
 <?php
-
 // This CLI example runs against the popular DVD RENTAL sample database.
 // It produces file 'delays.xml' in valid SpreadsheetML format. Open it with Excel.
 
