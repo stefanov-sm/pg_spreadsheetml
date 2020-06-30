@@ -22,17 +22,13 @@ SQL;
 $conn = new PDO('pgsql:dbname=dvdrental;host=<host>;port=<port>;user=<user>;password=<password>');
 
 // Allocate arguments
-$arguments_object = (object)[];
-$arguments_object -> Number_Of_Days = '7 days';
-$arguments_object -> cost = 15.00;
-$arguments_json = json_encode($arguments_object);
+$arguments_json = '{"Number_Of_Days":"7 days", "cost":15.00}';
 
 // While the report query and arguments are specific this part that follows is quite generic
-$rs = $conn -> prepare(XML_QUERY);
-$rs -> execute([$report_query, $arguments_json]);
+$conn -> prepare(XML_QUERY) -> execute([$report_query, $arguments_json]);
 $xml_file = fopen(OUTPUT_FILE_NAME, 'wb');
 while (($xml_line = $rs -> fetchColumn()) !== FALSE)
 {
-  fputs($xml_file, $xml_line);
+  fputs($xml_file, $xml_line.PHP_EOL);
 }
 fclose($xml_file);
