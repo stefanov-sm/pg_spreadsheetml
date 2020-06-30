@@ -12,7 +12,7 @@ Macro parameter placeholders are defined as valid uppercase identifiers with two
 
 Optional __arg_parameters__ is JSON with parameters' names/values, i.e. `{"number_of_days":"7 days", "cost":15.00}`. Parameters' names are K&R case-insesnitive identifiers.  
 
-__Hyperlinks:__ Cell values that match this pattern `#_value_##_URL_` will be presented as hyperlinks.  
+__Hyperlinks:__ Cell values that match this pattern `^#(.+)##(.+)$` i.e. __#_value_##_URL___ will be presented as hyperlinks.  
 
 __Note:__ pg_spreadsheetml is __injection prone__ and therefore it must be declared as a security definer owned by a limited user.
 
