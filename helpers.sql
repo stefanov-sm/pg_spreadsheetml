@@ -5,7 +5,13 @@
 create or replace function xml_escape(s text)
 returns text language sql immutable strict as
 $$
-  select replace(replace(replace(s, '&', '&amp;'), '>', '&gt;'), '<', '&lt;');
+    select  regexp_replace( regexp_replace( regexp_replace( s, '&', '&amp;', 'g' )
+                                , '>'
+                                , '&gt;'
+                                , 'g' )
+                            , '<'
+                            , '&lt;'
+                            , 'g' );
 $$;
 
 create or replace function public.json_typeofx(j json)
