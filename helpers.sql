@@ -50,7 +50,8 @@ $$
 declare
   k text;
   v text;
-  macro_to_expand int := 0;
+  macro_to_expand text[];
+  hint_message text;
 begin
   for k, v in select "key", "value" from json_each_text(args) loop
     macro := regexp_replace( macro
@@ -61,9 +62,12 @@ begin
   end loop;
 
   -- check there is no macro without expansion
-  macro_to_expand :=  array_length( regexp_matches( macro, '__[a-z]+__',  'i' ), 1 );
-  if macro_to_expand > 0 then
-    raise exception '% macro(s) not expanded, please check your JSON arguments!', macro_to_expand;
+  macro_to_expand := ARRAY( SELECT regexp_matches( macro, '__[a-z]+__',  'gi' ) );
+  if array_length( macro_to_expand, 1 ) > 0 then
+    hint_message := 'Macro(s) left: ' ||  array_to_string( macro_to_expand, ', ' );
+    raise exception '% macro(s) not expanded, please check your JSON arguments!'
+                  , array_length( macro_to_expand, 1 )
+             using hint = hint_message;
   end if;
 
   return macro;
