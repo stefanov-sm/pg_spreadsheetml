@@ -2,6 +2,16 @@
 -- pg_spreadsheetml helpers, S. Stefanov, Feb-2020
 --------------------------------------------------
 
+/**
+  * Performs tag escaping.
+  *
+  * Example:
+    testdb=> select xml_escape( '<xml version="1.0"> <equation> 10 > 20 && 20 < 100 </equation> </xml>' );
+                                                   xml_escape
+  -------------------------------------------------------------------------------------------------------------
+   &lt;xml version="1.0"&gt; &lt;equation&gt; 10 &gt; 20 &amp;&amp; 20 &lt; 100 &lt;/equation&gt; &lt;/xml&gt;
+  (1 row)
+*/
 create or replace function xml_escape(s text)
 returns text language sql immutable strict as
 $$
