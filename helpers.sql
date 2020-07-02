@@ -23,6 +23,20 @@ select
   end;
 $$;
 
+/**
+  * Performs macro expansion.
+  * A macro is any text with a double underscore at the beginning and at the end,
+  * like for example __FOO__.
+  * Macros are globally substituted with values into the `args` json array.
+  *
+  * Example:
+  testdb=> SELECT macro_expand( 'SELECT __FOO__ FROM __bar__ WHERE __i__ like __I__',
+                                '{ "I" : "10", "j" : "20", "bar" : "30", "foo" : "40" }'::json );
+              macro_expand
+  ------------------------------------
+   SELECT 40 FROM 30 WHERE 10 like 10
+
+  */
 create or replace function macro_expand(macro text, args json)
 returns text language plpgsql immutable strict as
 $$
@@ -31,7 +45,11 @@ declare
   v text;
 begin
   for k, v in select "key", "value" from json_each_text(args) loop
-    macro := replace(macro, '__'||upper(k)||'__', coalesce(v, ''));
+    macro := regexp_replace( macro
+                              , '__'|| k ||'__'
+                              , coalesce( v, '' )
+                              , 'gi' );
+    raise debug 'Key [%] = [%] produced [%]', k, v, macro;
   end loop;
   return macro;
 end;
