@@ -114,9 +114,9 @@ BEGIN
           when 'boolean'  then running_line := replace(BOOL_ITEM,   SR_TOKEN, v_value::boolean::int::text);
           when 'date'     then running_line := replace(DATE_ITEM,   SR_TOKEN, v_value);
           when 'datetime' then running_line := replace(DTIME_ITEM,  SR_TOKEN, left(v_value, TS_CHOP_SIZE));
-          when 'href'     then hrefarray := regexp_matches(xml_escape(v_value), HREF_REGEX);
-                          running_line := replace(replace(HREF_ITEM, SR_TOKEN, hrefarray[1]), HREF_TOKEN, hrefarray[2]);	
-          else            running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
+          when 'href'     then hrefarray    := regexp_matches(xml_escape(v_value), HREF_REGEX);
+                               running_line := replace(replace(HREF_ITEM, SR_TOKEN, hrefarray[1]), HREF_TOKEN, hrefarray[2]);	
+          else                 running_line := replace(TEXT_ITEM,   SR_TOKEN, xml_escape(v_value));
         end case;
       end if;
       running_column := running_column + 1;
